@@ -140,11 +140,10 @@ func getLevels(level string) []string {
 
 // init WebHookSink with url params
 func NewWebHookSink(uri *url.URL) (*WebHookSink, error) {
-	klog.Infof("http uri:%s.", uri)
-	klog.Infof("http method:%s.", uri.Scheme)
+	klog.Infof("uri : %+v", uri)
 	s := &WebHookSink{
 		// default http method
-		method:       uri.Scheme,
+		method:       http.MethodGet,
 		bodyTemplate: defaultBodyTemplate,
 		filters:      make(map[string]filters.Filter),
 	}
@@ -157,7 +156,7 @@ func NewWebHookSink(uri *url.URL) (*WebHookSink, error) {
 	}
 
 	opts := uri.Query()
-
+	klog.Infof("uri.query: %+v", opts)
 	if len(opts["method"]) >= 1 {
 		s.method = opts["method"][0]
 	}
