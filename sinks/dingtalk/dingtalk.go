@@ -102,10 +102,7 @@ func (d *DingTalkSink) Stop() {
 }
 
 func (d *DingTalkSink) ExportEvents(batch *core.EventBatch) {
-	klog.Infof("DingTalkSink : %+v", d)
-	klog.Infof("start exprot event to dingding")
 	for _, event := range batch.Events {
-		klog.Infof("shoudao de event : %+v", event)
 		if d.isEventLevelDangerous(event.Type) {
 			klog.Infof("fuhe tiaojian de event: %+v", event)
 			d.Ding(event)
@@ -125,6 +122,7 @@ func (d *DingTalkSink) isEventLevelDangerous(level string) bool {
 }
 
 func (d *DingTalkSink) Ding(event *v1.Event) {
+	klog.Infof("DingTalkSink: %v", d)
 	value := url.Values{}
 	if d.Namespaces != nil {
 		skip := true
@@ -177,6 +175,7 @@ func (d *DingTalkSink) Ding(event *v1.Event) {
 		klog.Errorf("failed to create http request")
 		return
 	}
+	klog.Infof("zuzhuang de request: %s", request)
 	request.URL.RawQuery = value.Encode()
 	request.Header.Add("Content-Type", "application/json;charset=utf-8")
 	resp, err := (&http.Client{}).Do(request)
@@ -184,6 +183,7 @@ func (d *DingTalkSink) Ding(event *v1.Event) {
 		klog.Errorf("failed to send msg to dingtalk. error: %s", err.Error())
 		return
 	}
+	klog.Infof("send dingding's response : %s", resp)
 	defer resp.Body.Close()
 	if resp != nil && resp.StatusCode != http.StatusOK {
 		klog.Errorf("failed to send msg to dingtalk, because the response code is %d", resp.StatusCode)
