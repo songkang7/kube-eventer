@@ -102,8 +102,12 @@ func (d *DingTalkSink) Stop() {
 }
 
 func (d *DingTalkSink) ExportEvents(batch *core.EventBatch) {
+	klog.Infof("DingTalkSink : %+v", d)
+	klog.Infof("start exprot event to dingding")
 	for _, event := range batch.Events {
+		klog.Infof("shoudao de event : %+v", event)
 		if d.isEventLevelDangerous(event.Type) {
+			klog.Infof("fuhe tiaojian de event: %+v", event)
 			d.Ding(event)
 			// add threshold
 			time.Sleep(time.Millisecond * 50)
@@ -113,6 +117,7 @@ func (d *DingTalkSink) ExportEvents(batch *core.EventBatch) {
 
 func (d *DingTalkSink) isEventLevelDangerous(level string) bool {
 	score := getLevel(level)
+	klog.Infof("huoqu de event level: %+v", score)
 	if score >= d.Level {
 		return true
 	}
@@ -121,7 +126,6 @@ func (d *DingTalkSink) isEventLevelDangerous(level string) bool {
 
 func (d *DingTalkSink) Ding(event *v1.Event) {
 	value := url.Values{}
-
 	if d.Namespaces != nil {
 		skip := true
 		for _, namespace := range d.Namespaces {
