@@ -175,9 +175,10 @@ func (d *DingTalkSink) Ding(event *v1.Event) {
 		klog.Errorf("failed to create http request")
 		return
 	}
-	klog.Infof("zuzhuang de request: %s", request)
+	klog.Infof("d.token: %s", d.Token)
 	request.URL.RawQuery = value.Encode()
 	request.Header.Add("Content-Type", "application/json;charset=utf-8")
+	klog.Infof("zuzhuang de request: %s", request)
 	resp, err := (&http.Client{}).Do(request)
 	if err != nil {
 		klog.Errorf("failed to send msg to dingtalk. error: %s", err.Error())
