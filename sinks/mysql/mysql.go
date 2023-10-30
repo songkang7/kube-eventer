@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	mysql_common "github.com/AliyunContainerService/kube-eventer/common/mysql"
 	"github.com/AliyunContainerService/kube-eventer/core"
+	"github.com/AliyunContainerService/kube-eventer/util"
 	kube_api "k8s.io/api/core/v1"
 	"k8s.io/klog"
 	"net/url"
@@ -70,7 +71,7 @@ func eventToPoint(event *kube_api.Event) (*mysql_common.MysqlKubeEventPoint, err
 	if err != nil {
 		return nil, err
 	}
-	klog.Infof(value)
+	klog.V(9).Infof(value)
 
 	point := mysql_common.MysqlKubeEventPoint{
 		Name:                     event.InvolvedObject.Name,
@@ -81,7 +82,7 @@ func eventToPoint(event *kube_api.Event) (*mysql_common.MysqlKubeEventPoint, err
 		Message:                  event.Message,
 		Kind:                     event.InvolvedObject.Kind,
 		FirstOccurrenceTimestamp: event.FirstTimestamp.Time.String(),
-		LastOccurrenceTimestamp:  event.LastTimestamp.Time.String(),
+		LastOccurrenceTimestamp:  util.GetLastEventTimestamp(event).String(),
 	}
 
 	return &point, nil
@@ -113,7 +114,7 @@ func (sink *mysqlSink) ExportEvents(eventBatch *core.EventBatch) {
 		}
 
 	}
-
+	klog.V(1).Infof("sinking %v events to mysql success.", len(eventBatch.Events))
 }
 
 func (sink *mysqlSink) Name() string {

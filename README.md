@@ -53,7 +53,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       serviceAccount: kube-eventer
       containers:
-        - image: registry.aliyuncs.com/acs/kube-eventer-amd64:v1.2.0-484d9cd-aliyun
+        - image: registry.aliyuncs.com/acs/kube-eventer:v1.2.7-ca03be0-aliyun
           name: kube-eventer
           command:
             - "/kube-eventer"
@@ -143,8 +143,10 @@ Supported Sinks:
 Please check <a href="docs/en/CONTRIBUTING.md" target="_blank">CONTRIBUTING.md</a>
 
 You can also ask for help in our Dingtalk group.
+dingtalk group1 (full): 30612594
+dingtalk group2: 5605020816
 <p align="center">
-  <img src="docs/images/dingtalk-group.jpg" width=300px />
+  <img src="docs/images/dingtalk-group2.jpg" width=300px />
 </p>
 
 
