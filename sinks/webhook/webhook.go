@@ -64,7 +64,6 @@ func (ws *WebHookSink) ExportEvents(batch *core.EventBatch) {
 
 // send msg to generic webHook
 func (ws *WebHookSink) Send(event *v1.Event) (err error) {
-	klog.Infof("jianyanqian: %v", event)
 	for _, v := range ws.filters {
 		if !v.Filter(event) {
 			return
@@ -93,6 +92,7 @@ func (ws *WebHookSink) Send(event *v1.Event) (err error) {
 	}
 
 	resp, err := http.DefaultClient.Do(req)
+	klog.Infof("resp: %v", resp)
 	if err != nil {
 		klog.Errorf("Failed to send event to sink,because of %v", err)
 		return err
