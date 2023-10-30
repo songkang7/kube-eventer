@@ -76,7 +76,9 @@ func (ws *WebHookSink) Send(event *v1.Event) (err error) {
 		return err
 	}
 
+	klog.Infof("body:%v", body)
 	bodyBuffer := bytes.NewBuffer([]byte(body))
+	klog.Infof("bodyBuffer:%v", bodyBuffer)
 	req, err := http.NewRequest(ws.method, ws.endpoint, bodyBuffer)
 
 	// append header to http request
