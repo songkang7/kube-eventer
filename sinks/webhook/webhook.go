@@ -64,12 +64,13 @@ func (ws *WebHookSink) ExportEvents(batch *core.EventBatch) {
 
 // send msg to generic webHook
 func (ws *WebHookSink) Send(event *v1.Event) (err error) {
+	klog.Infof("jianyanqian: %v", event)
 	for _, v := range ws.filters {
 		if !v.Filter(event) {
 			return
 		}
 	}
-
+	klog.Infof("tongguojianyan: %v", event)
 	body, err := ws.RenderBodyTemplate(event)
 	if err != nil {
 		klog.Errorf("Failed to RenderBodyTemplate,because of %v", err)

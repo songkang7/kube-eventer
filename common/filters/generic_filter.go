@@ -1,6 +1,7 @@
 package filters
 
 import (
+	"fmt"
 	"reflect"
 	"regexp"
 
@@ -20,7 +21,7 @@ func IsZero(v reflect.Value) bool {
 
 func (gf *GenericFilter) Filter(event *v1.Event) (matched bool) {
 	var field reflect.Value
-
+	fmt.Printf("gf.field: %v", gf.field)
 	switch gf.field {
 	case "Kind":
 		field = reflect.Indirect(reflect.ValueOf(event)).FieldByNameFunc(func(name string) bool {
@@ -35,7 +36,7 @@ func (gf *GenericFilter) Filter(event *v1.Event) (matched bool) {
 	case "Reason":
 		field = reflect.Indirect(reflect.ValueOf(event)).FieldByName("Reason")
 	}
-
+	fmt.Printf("field: %v", field)
 	if IsZero(field) {
 		return false
 	}
