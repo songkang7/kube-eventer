@@ -115,7 +115,8 @@ func (this *KubernetesEventSource) watch() {
 			continue
 		}
 		// Do not write old events.
-		klog.Infof("kubernetes source watch event. list event first. raw events: %v", events)
+		klog.V(9).Infof("kubernetes source watch event. list event first. raw events: %v", events)
+
 		resourceVersion := events.ResourceVersion
 
 		watcher, err := this.eventClient.Watch(
