@@ -69,7 +69,6 @@ func (ws *WebHookSink) Send(event *v1.Event) (err error) {
 			return
 		}
 	}
-	klog.Infof("tongguojianyan: %v", event)
 	body, err := ws.RenderBodyTemplate(event)
 	if err != nil {
 		klog.Errorf("Failed to RenderBodyTemplate,because of %v", err)
@@ -78,7 +77,6 @@ func (ws *WebHookSink) Send(event *v1.Event) (err error) {
 
 	klog.Infof("body:%v", body)
 	bodyBuffer := bytes.NewBuffer([]byte(body))
-	klog.Infof("bodyBuffer:%v", bodyBuffer)
 	req, err := http.NewRequest(ws.method, ws.endpoint, bodyBuffer)
 
 	// append header to http request
