@@ -92,7 +92,6 @@ func (ws *WebHookSink) Send(event *v1.Event) (err error) {
 	}
 
 	resp, err := http.DefaultClient.Do(req)
-	klog.Infof("resp: %v", resp)
 	if err != nil {
 		klog.Errorf("Failed to send event to sink,because of %v", err)
 		return err
