@@ -3,6 +3,7 @@ package webhook
 import (
 	"bytes"
 	"fmt"
+	"github.com/AliyunContainerService/kube-eventer/util"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -58,6 +59,7 @@ func (ws *WebHookSink) ExportEvents(batch *core.EventBatch) {
 		}
 		time.Sleep(50 * time.Millisecond)
 	}
+	klog.V(1).Infof("Webhook %v Exporting %v events.", ws.endpoint, len(batch.Events))
 }
 
 // send msg to generic webHook
@@ -116,6 +118,7 @@ func (ws *WebHookSink) RenderBodyTemplate(event *v1.Event) (body string, err err
 		return "", err
 	}
 	event.Message = strings.Replace(event.Message, `"`, ``, -1)
+	event.LastTimestamp = metav1.Time{Time: util.GetLastEventTimestamp(event)}
 	if err := tp.Execute(&tpl, event); err != nil {
 		klog.Errorf("Failed to renderTemplate,because of %v", err)
 		return "", err

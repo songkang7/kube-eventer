@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,15 +19,16 @@ import (
 	"github.com/AliyunContainerService/kube-eventer/core"
 	metrics_core "github.com/AliyunContainerService/kube-eventer/metrics/core"
 	"github.com/AliyunContainerService/kube-eventer/sinks/utils"
+	"github.com/AliyunContainerService/kube-eventer/util"
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/sls"
 	"k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog"
 	"log"
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -38,9 +39,9 @@ const (
 )
 
 /*
-	Usage:
-	--sink=sls:https://sls.aliyuncs.com?logStore=[your_log_store]&project=[your_project_name]
-*/
+ * Usage:
+ * --sink=sls:https://sls.aliyuncs.com?logStore=[your_log_store]&project=[your_project_name]&label=<key,value>
+ */
 type SLSSink struct {
 	Config   *Config
 	Project  string
@@ -56,6 +57,7 @@ type Config struct {
 	internal        bool
 	accessKeyId     string
 	accessKeySecret string
+	label           map[string]string
 }
 
 func (s *SLSSink) Name() string {
@@ -70,7 +72,7 @@ func (s *SLSSink) ExportEvents(batch *core.EventBatch) {
 	for _, event := range batch.Events {
 		log := &sls.Log{}
 
-		time := getEventTime(event)
+		time := uint32(util.GetLastEventTimestamp(event).Unix())
 
 		log.Time = &time
 
@@ -95,19 +97,6 @@ func (s *SLSSink) ExportEvents(batch *core.EventBatch) {
 	if err != nil {
 		klog.Errorf("failed to put events to sls,because of %v", err)
 	}
-}
-
-func getEventTime(event *v1.Event) uint32 {
-
-	if !event.LastTimestamp.IsZero() {
-		return uint32(event.LastTimestamp.Unix())
-	}
-
-	if !event.EventTime.IsZero() {
-		return uint32(event.EventTime.Unix())
-	}
-
-	return uint32(metav1.Now().Unix())
 }
 
 func (s *SLSSink) Stop() {
@@ -150,6 +139,18 @@ func (s *SLSSink) eventToContents(event *v1.Event) []*sls.Log_Content {
 			Key:   &metrics_core.LabelPodName.Key,
 			Value: &event.InvolvedObject.Name,
 		})
+	}
+
+	if len(s.Config.label) > 0 {
+		for key, value := range s.Config.label {
+			// deep copy
+			newKey := key
+			newValue := value
+			contents = append(contents, &sls.Log_Content{
+				Key:   &newKey,
+				Value: &newValue,
+			})
+		}
 	}
 
 	return contents
@@ -226,7 +227,26 @@ func parseConfig(uri *url.URL) (*Config, error) {
 			c.internal = internal
 		}
 	}
+
+	if len(opts["label"]) >= 1 {
+		labelsStrs := opts["label"]
+		c.label = parseLabels(labelsStrs)
+	}
+
 	return c, nil
+}
+
+func parseLabels(labelsStrs []string) map[string]string {
+	labels := make(map[string]string)
+	for _, kv := range labelsStrs {
+		kvItems := strings.Split(kv, ",")
+		if len(kvItems) == 2 {
+			labels[kvItems[0]] = kvItems[1]
+		} else {
+			klog.Errorf("parse sls labels error. labelsStr: %v, kv format error: %v", labelsStrs, kv)
+		}
+	}
+	return labels
 }
 
 // newClient creates client using AK or metadata
